@@ -941,11 +941,11 @@ class BP_Notifications_Notification {
 			$values[] = $value;
 		}
 
-		foreach ( $where_args['data'] as $field => $value ) {
-			$index  = array_search( $field, array_keys( $where_args['data'] ) );
+		foreach ( $where_args['data'] as $where_field => $value ) {
+			$index  = array_search( $where_field, array_keys( $where_args['data'] ) );
 			$format = $where_args['format'][ $index ];
 
-			$conditions[] = "{$field} = {$format}";
+			$conditions[] = "{$where_field} = {$format}";
 			$values[]     = $value;
 		}
 
@@ -954,6 +954,9 @@ class BP_Notifications_Notification {
 
 		/** This action is documented in bp-notifications/classes/class-bp-notifications-notification.php */
 		do_action( 'bp_notification_before_update', $update_args, $where_args );
+
+		/** This action is documented in bp-notifications/classes/class-bp-notifications-notification.php */
+		do_action( 'bp_notification_before_update_id_list', $field, $items, $data, $where, $update_args, $where_args );
 
 		return $wpdb->query( $wpdb->prepare( "UPDATE {$bp->notifications->table_name} SET {$fields} WHERE {$conditions}", $values ) );
 	}
@@ -1033,6 +1036,9 @@ class BP_Notifications_Notification {
 
 		/** This action is documented in bp-notifications/classes/class-bp-notifications-notification.php */
 		do_action( 'bp_notification_before_delete', $args );
+
+		/** This action is documented in bp-notifications/classes/class-bp-notifications-notification.php */
+		do_action( 'bp_notification_before_delete_by_id_list', $field, $items, $args );
 
 		if ( ! $values ) {
 			return $wpdb->query( "DELETE FROM {$bp->notifications->table_name} WHERE {$conditions}" );

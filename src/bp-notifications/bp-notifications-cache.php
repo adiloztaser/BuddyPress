@@ -104,3 +104,48 @@ function bp_notifications_clear_all_for_user_cache_before_update( $update_args, 
 	}
 }
 add_action( 'bp_notification_before_update', 'bp_notifications_clear_all_for_user_cache_before_update', 10, 2 );
+
+/**
+ * Invalidate the 'all_for_user_' cache when deleting notifications by id list.
+ *
+ * @since 10.1.0
+ *
+ * @param string $field The name of the db field of the items to delete.
+ *                      Possible values are `id` or `item_id`.
+ * @param int[]  $items The list of items to delete.
+ * @param array  $args  The WHERE arguments to use to specify the item IDs to delete.
+ */
+function bp_notifications_clear_all_for_user_cache_before_delete_by_id_list( $field, $items, $args ) {
+	$args[ $field ] = $items;
+
+	$notifications = BP_Notifications_Notification::get( $args );
+	$user_ids      = wp_parse_id_list( wp_list_pluck( $notifications, 'user_id' ) );
+
+	foreach ( $user_ids as $user_id ) {
+		bp_notifications_clear_all_for_user_cache( $user_id );
+	}
+}
+add_action( 'bp_notification_before_delete_by_id_list', 'bp_notifications_clear_all_for_user_cache_before_delete_by_id_list', 10, 3 );
+
+/**
+ * Invalidate the 'all_for_user_' cache when updating notifications by id list.
+ *
+ * @since 10.1.0
+ *
+ * @param string $field The name of the db field of the items to update.
+ *                      Possible values are `id` or `item_id`.
+ * @param int[]  $items The list of items to update.
+ * @param array  $data  Array of notification data to update.
+ * @param array  $where The WHERE params to use to specify the item IDs to update.
+ */
+function bp_notifications_clear_all_for_user_cache_before_update_id_list( $field, $items, $data, $where ) {
+	$where[ $field ] = $items;
+
+	$notifications = BP_Notifications_Notification::get( $where );
+	$user_ids      = wp_parse_id_list( wp_list_pluck( $notifications, 'user_id' ) );
+
+	foreach ( $user_ids as $user_id ) {
+		bp_notifications_clear_all_for_user_cache( $user_id );
+	}
+}
+add_action( 'bp_notification_before_update_id_list', 'bp_notifications_clear_all_for_user_cache_before_update_id_list', 10, 4 );
